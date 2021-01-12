@@ -1,0 +1,5 @@
+{
+  "token": "...",
+  "mongoUrl": "mongodb://localhost:27017/bap-planaria",
+  "dbName": "bap-planaria"
+}

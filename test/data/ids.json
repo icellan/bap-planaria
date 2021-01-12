@@ -1,0 +1,28 @@
+[
+  {
+    "_id": "714a3c856435781fb48ca16a4cf0ba9bc1ef16dd7abbc060d3e18e7e900eec9f",
+    "firstSeen": 590194,
+    "rootAddress": "18nBpQeLxQpnvnZninJbbtGHgY7ru6Mboa",
+    "currentAddress": "134a6TXxzgQ9Az3w8BcvgdZyA5UqRL89da",
+    "addresses": [
+      {
+        "address": "134a6TXxzgQ9Az3w8BcvgdZyA5UqRL89da",
+        "txId": "aa9670f44439c45db24daa5d084021b6667ff317a550d3a5671f564fac4d724c",
+        "block": 590194
+      }
+    ]
+  },
+  {
+    "_id": "001f24e2b0e74c98ab76f6d1f09baa5ea81570e6aea3b1dbe6e2f2513b0c3af9",
+    "firstSeen": 591382,
+    "rootAddress": "1DhBr7QrqKYp8Gk5EasTBGmDfSoMXE7P2c",
+    "currentAddress": "1AvzFCsUMM1t5DWxXYGvFxc3SvnLbgt1xb",
+    "addresses": [
+      {
+        "address": "1AvzFCsUMM1t5DWxXYGvFxc3SvnLbgt1xb",
+        "txId": "1531bdb5beb4c5da6953adffa286cc9d96e4735a4d1b6b9b1256f18c97695e93",
+        "block": 591382
+      }
+    ]
+  }
+]
