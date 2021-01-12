@@ -1,8 +1,9 @@
 import fetch from 'node-fetch';
 import { TOKEN } from './config';
 
-export const getBitbusBlockEvents = async function (query) {
-  const response = await fetch('https://txo.bitbus.network/block', {
+export const getBitbusBlockEvents = async function (query, parser = 'txo') {
+  parser = parser === 'bob' ? 'bob' : 'txo';
+  const response = await fetch(`https://${parser}.bitbus.network/block`, {
     method: 'post',
     headers: {
       'Content-type': 'application/json; charset=utf-8',

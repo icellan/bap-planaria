@@ -22,6 +22,11 @@ const options = yargs(hideBin(process.argv))
     describe: 'JSON strinigifed query to get from bitbus - use together with -g option',
     type: 'string',
   })
+  .option('p', {
+    alias: 'parser',
+    describe: 'type of parser (bob or txo)',
+    type: 'string',
+  })
   .argv;
 
 (async () => {
@@ -38,6 +43,7 @@ const options = yargs(hideBin(process.argv))
           blk: 1,
           'tx.h': 1,
           out: 1,
+          in: 1,
         },
         limit: 10,
       },
@@ -51,7 +57,8 @@ const options = yargs(hideBin(process.argv))
       process.exit(-1);
     }
     console.log(query);
-    console.log(JSON.stringify(await getBitbusBlockEvents(query)));
+    const parser = options.parser || 'txo';
+    console.log(JSON.stringify(await getBitbusBlockEvents(query, parser)));
     process.exit();
   } else if (options.action === 'watch') {
     console.log('Running continuous watch');
