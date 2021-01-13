@@ -1,9 +1,14 @@
 {
   "name": "bap-planaria",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "BAP indexer to MongoDB",
   "author": "icellan (https://github.com/icellan)",
   "license": "Open BSV License",
+  "homepage": "https://github.com/icellan/bap-planaria",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/icellan/bap-planaria.git"
+  },
   "scripts": {
     "clean": "rimraf dist/",
     "build": "rimraf dist/ && babel src/ --presets minify --out-dir dist/",
