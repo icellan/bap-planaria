@@ -2,6 +2,8 @@
   "name": "bap-planaria",
   "version": "1.0.0",
   "description": "BAP indexer to MongoDB",
+  "author": "icellan (https://github.com/icellan)",
+  "license": "Open BSV License",
   "scripts": {
     "clean": "rimraf dist/",
     "build": "rimraf dist/ && babel src/ --presets minify --out-dir dist/",
@@ -18,14 +20,13 @@
     "run": "npm run build && node ./dist/index.js",
     "start": "node ./dist/index.js"
   },
+  "main": "dist/bap.js",
   "keywords": [
     "bap",
     "bitcoin",
     "bsv",
     "bitbus"
   ],
-  "author": "icellan (https://github.com/icellan)",
-  "license": "Open BSV License",
   "dependencies": {
     "bsv": "^2.0.4",
     "bsv-message": "^1.0.3",
@@ -60,6 +61,9 @@
     "regenerator-runtime": "^0.12.1",
     "rimraf": "2.6.2",
     "run-sequence": "2.2.1"
+  },
+  "bin": {
+    "bap-planaria": "./dist/index.js"
   },
   "jest": {
     "transform": {
