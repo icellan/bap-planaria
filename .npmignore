@@ -1,1 +1,7 @@
 .idea/
+coverage/
+test/
+start.sh
+watch.sh
+.babelrc
+.eslintrc
