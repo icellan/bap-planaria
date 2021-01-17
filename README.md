@@ -139,6 +139,7 @@ You can also pass a custom query to the BAP scripts, overriding the default quer
 
 ```javascript
 import { watchBAPTransactions } from 'bap-planaria/src/watch';
+import { BAP_BITCOM_ADDRESS } from 'bap-planaria/src/config';
 
 process.env.BAP_PLANARIA_TOKEN = '<planaria token>';
 process.env.BAP_MONGO_URL = 'mongodb://localhost:27017/bap-planaria';
