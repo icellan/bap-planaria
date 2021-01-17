@@ -14,19 +14,21 @@ import { getStatusValue, updateStatusValue } from './status';
 
 export const FIRST_BAP_BLOCK = 590000;
 
-export const getBitsocketQuery = function (lastBlockIndexed = false) {
+export const getBitsocketQuery = function (lastBlockIndexed = false, queryFind = false) {
+  queryFind = queryFind || {
+    $or: [
+      {
+        'out.s1': BAP_BITCOM_ADDRESS,
+      },
+      {
+        'out.s2': BAP_BITCOM_ADDRESS,
+      },
+    ],
+  };
+
   const query = {
     q: {
-      find: {
-        $or: [
-          {
-            'out.s1': BAP_BITCOM_ADDRESS,
-          },
-          {
-            'out.s2': BAP_BITCOM_ADDRESS,
-          },
-        ],
-      },
+      find: queryFind,
       sort: {
         'blk.i': 1,
       },
@@ -251,9 +253,9 @@ export const processBlockEvents = async function (event) {
   }
 };
 
-export const indexBAPTransactions = async function () {
+export const indexBAPTransactions = async function (queryFind) {
   const lastBlockIndexed = await getLastBlockIndex();
-  const query = getBitsocketQuery(lastBlockIndexed);
+  const query = getBitsocketQuery(lastBlockIndexed, queryFind);
 
   const data = await getBitbusBlockEvents(query);
   for (let i = 0; i < data.length; i++) {
@@ -263,7 +265,7 @@ export const indexBAPTransactions = async function () {
   return true;
 };
 
-export const indexBAPTransactionsStream = async function () {
+export const indexBAPTransactionsStream = async function (queryFind = false) {
   const lastBlockIndexed = await getLastBlockIndex();
 
   if (DEBUG) console.log('POST https://txo.bitbus.network/block');
@@ -274,7 +276,7 @@ export const indexBAPTransactionsStream = async function () {
       token: TOKEN,
       from: FIRST_BAP_BLOCK,
     },
-    body: JSON.stringify(getBitsocketQuery(lastBlockIndexed)),
+    body: JSON.stringify(getBitsocketQuery(lastBlockIndexed, queryFind)),
   });
 
   return new Promise((resolve, reject) => {

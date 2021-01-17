@@ -5,9 +5,10 @@ import {
   processBlockEvents,
 } from './bap.js';
 
-export const watchBAPTransactions = async function () {
+export const watchBAPTransactions = async function (queryFind = false) {
   // Base64 encode your bitquery
-  const query = { q: { find: { 'out.s2': BAP_BITCOM_ADDRESS } } };
+  queryFind = queryFind || { 'out.s2': BAP_BITCOM_ADDRESS };
+  const query = { q: { find: queryFind } };
   const b64 = Buffer.from(JSON.stringify(query))
     .toString('base64');
 

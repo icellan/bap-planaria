@@ -1,3 +1,4 @@
+import url from 'url';
 import config from '../config.json';
 
 export const DEBUG = !!(process.env.DEBUG || config.DEBUG || false);
@@ -8,9 +9,10 @@ if (!TOKEN) {
   console.error('No Planaria token defined in config.json (https://token.planaria.network/)');
   process.exit(-1);
 }
-export const mongoUrl = process.env.MONGO_URL || config.mongoUrl;
+export const mongoUrl = process.env.BAP_MONGO_URL || process.env.MONGO_URL || config.mongoUrl;
 if (!mongoUrl) {
   console.error('No MongoDB connection defined in ENV or config.json');
   process.exit(-1);
 }
-export const dbName = process.env.BAP_DB_NAME || config.dbName || 'bap-planaria';
+const parsedMongoUrl = url.parse(mongoUrl);
+export const dbName = parsedMongoUrl.pathname.replace(/\//g, '');

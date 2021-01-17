@@ -22,8 +22,7 @@ The token is a Planaria Token that can be created here: https://token.planaria.n
 And optionally overwrite the defaults for the database:
 
 ```shell
-export MONGO_URL="mongodb://localhost:27017/bap-planaria"
-export BAP_DB_NAME="bap-planaria"
+export BAP_MONGO_URL="mongodb://localhost:27017/bap-planaria"
 ```
 
 Indexing BAP blocks can now be done by running
@@ -71,16 +70,14 @@ config.json
 ```json
 {
   "token": "ey...",
-  "mongoUrl": "mongodb://...",
-  "dbName": "bap-planaria"
+  "mongoUrl": "mongodb://..."
 }
 ```
 
 environment
 ```shell
 export BAP_PLANARIA_TOKEN="ey..."
-export BAP_DB_NAME="bap-planaria"
-export MONGO_URL="mongo://..."
+export BAP_MONGO_URL="mongo://..."
 ```
 
 ## run
@@ -118,8 +115,7 @@ npm install bap-planaria
 import { indexBAPTransactions } from 'bap-planaria/src/bap';
 
 process.env.BAP_PLANARIA_TOKEN = '<planaria token>';
-process.env.MONGO_URL = 'mongodb://localhost:27017/bap-planaria';
-process.env.BAP_DB_NAME = 'bap-planaria';
+process.env.BAP_MONGO_URL = 'mongodb://localhost:27017/bap-planaria';
 
 (async function() {
   await indexBAPTransactions();
@@ -132,12 +128,30 @@ or
 import { watchBAPTransactions } from 'bap-planaria/src/watch';
 
 process.env.BAP_PLANARIA_TOKEN = '<planaria token>';
-process.env.MONGO_URL = 'mongodb://localhost:27017/bap-planaria';
-process.env.BAP_DB_NAME = 'bap-planaria';
+process.env.BAP_MONGO_URL = 'mongodb://localhost:27017/bap-planaria';
 
 (async function() {
   await watchBAPTransactions();
 })();
 ```
+
+You can also pass a custom query to the BAP scripts, overriding the default query that search for the BAP address.
+
+```javascript
+import { watchBAPTransactions } from 'bap-planaria/src/watch';
+
+process.env.BAP_PLANARIA_TOKEN = '<planaria token>';
+process.env.BAP_MONGO_URL = 'mongodb://localhost:27017/bap-planaria';
+
+(async function() {
+  // this will only watch for new ID transactions
+  await watchBAPTransactions({
+    'out.s2': BAP_BITCOM_ADDRESS,
+    'out.s3': 'ID'
+  });
+})();
+```
+
+# Babel
 
 Make sure babel is set up properly or that es6 is supported by your own package.
