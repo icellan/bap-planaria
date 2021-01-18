@@ -111,38 +111,38 @@ npm run testwatch
 npm install bap-planaria
 ```
 
+Make sure you set the environment variables before running any scripts:
+
+```shell
+export BAP_PLANARIA_TOKEN = '<planaria token>';
+export BAP_MONGO_URL = 'mongodb://localhost:27017/bap-planaria';
+```
+
+Index all mined BAP transactions:
+
 ```javascript
 import { indexBAPTransactions } from 'bap-planaria/src/bap';
-
-process.env.BAP_PLANARIA_TOKEN = '<planaria token>';
-process.env.BAP_MONGO_URL = 'mongodb://localhost:27017/bap-planaria';
 
 (async function() {
   await indexBAPTransactions();
 })();
 ```
 
-or
+or, index all mined transactions + listen to the mempool:
 
 ```javascript
 import { watchBAPTransactions } from 'bap-planaria/src/watch';
-
-process.env.BAP_PLANARIA_TOKEN = '<planaria token>';
-process.env.BAP_MONGO_URL = 'mongodb://localhost:27017/bap-planaria';
 
 (async function() {
   await watchBAPTransactions();
 })();
 ```
 
-You can also pass a custom query to the BAP scripts, overriding the default query that search for the BAP address.
+You can also pass a custom query to the BAP scripts, overriding the default query that searches for BAP transactions.
 
 ```javascript
 import { watchBAPTransactions } from 'bap-planaria/src/watch';
 import { BAP_BITCOM_ADDRESS } from 'bap-planaria/src/config';
-
-process.env.BAP_PLANARIA_TOKEN = '<planaria token>';
-process.env.BAP_MONGO_URL = 'mongodb://localhost:27017/bap-planaria';
 
 (async function() {
   // this will only watch for new ID transactions
