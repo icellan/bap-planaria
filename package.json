@@ -1,6 +1,6 @@
 {
   "name": "bap-planaria",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "BAP indexer to MongoDB",
   "author": "icellan (https://github.com/icellan)",
   "license": "Open BSV License",
@@ -33,8 +33,7 @@
     "bitbus"
   ],
   "dependencies": {
-    "bsv": "^2.0.4",
-    "bsv-message": "^1.0.3",
+    "bsv": "^1.5.3",
     "event-stream": "^4.0.1",
     "eventsource": "^1.0.7",
     "mongodb": "^3.6.2",

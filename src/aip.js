@@ -1,4 +1,4 @@
-import Message from 'bsv-message';
+import Message from 'bsv/message';
 import { DEBUG, AIP_BITCOM_ADDRESS, BAP_BITCOM_ADDRESS } from './config.js';
 
 /**
@@ -33,8 +33,7 @@ export const validAIPSignature = function (opReturn) {
     const bitcoinAddress = opReturn[AIP_BITCOM_ADDRESS][2];
     const signatureString = opReturn[AIP_BITCOM_ADDRESS][3];
 
-    const message = Message(messageBuffer.toString());
-    return message.verify(bitcoinAddress, signatureString);
+    return Message.verify(messageBuffer, bitcoinAddress, signatureString);
   } catch (e) {
     if (DEBUG) console.error(e);
   }
