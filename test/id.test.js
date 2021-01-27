@@ -214,6 +214,12 @@ describe('wasIdValidForAddressAt', () => {
     expect(valid).toEqual(true);
   });
 
+  test('simple valid same block', async () => {
+    await ID.insert(ids[0]);
+    const valid = await wasIdValidForAddressAt(ids[0].addresses[0].address, 590194);
+    expect(valid).toEqual(true);
+  });
+
   test('simple invalid', async () => {
     await ID.insert(ids[0]);
     const valid = await wasIdValidForAddressAt(ids[0].addresses[0].address, 590192);

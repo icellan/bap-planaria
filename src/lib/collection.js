@@ -2,6 +2,7 @@ import { getDB } from './db';
 
 /**
  * Collection class helper for working with mongodb
+ * TODO: refactor this into separate package
  */
 export class Collection {
   /**
@@ -34,12 +35,12 @@ export class Collection {
   async find(selector = {}, options = {}) {
     if (!this.db) this.db = await getDB();
 
-    this._runBeforeHook('find', selector, options);
+    await this._runBeforeHook('find', selector, options);
 
     const result = await this.db.collection(this.collectionName)
       .find(selector, options);
 
-    this._runAfterHook('find', result);
+    await this._runAfterHook('find', result);
 
     return result;
   }
@@ -54,12 +55,12 @@ export class Collection {
   async findOne(selector = {}, options = {}) {
     if (!this.db) this.db = await getDB();
 
-    this._runBeforeHook('findOne', selector, options);
+    await this._runBeforeHook('findOne', selector, options);
 
     const result = await this.db.collection(this.collectionName)
       .findOne(selector);
 
-    this._runAfterHook('findOne', result);
+    await this._runAfterHook('findOne', result);
 
     return result;
   }
@@ -81,7 +82,7 @@ export class Collection {
       const doc = await this.findOne(selector)
         .catch((e) => { console.error(e); });
 
-      this._runBeforeHook('updateOne', doc, modifier, options);
+      await this._runBeforeHook('updateOne', doc, modifier, options);
 
       const result = await this.db.collection(this.collectionName)
         .updateOne(doc ? { _id: doc._id } : selector, cleanModifier, options);
@@ -91,7 +92,7 @@ export class Collection {
 
       if (this._hasAfterHook('updateOne')) {
         const updatedDoc = await this.findOne({ _id });
-        this._runAfterHook('updateOne', updatedDoc, modifier, options);
+        await this._runAfterHook('updateOne', updatedDoc, modifier, options);
       }
 
       return result;
@@ -112,13 +113,13 @@ export class Collection {
   async updateMany(selector, modifier, options = {}) {
     if (!this.db) this.db = await getDB();
 
-    this._runBeforeHook('updateMany', selector, modifier, options);
+    await this._runBeforeHook('updateMany', selector, modifier, options);
 
     const cleanModifier = this._getCleanModifier(modifier);
     const result = await this.db.collection(this.collectionName)
       .updateMany(selector, cleanModifier, options);
 
-    this._runAfterHook('updateMany', selector, modifier, options);
+    await this._runAfterHook('updateMany', selector, modifier, options);
 
     return result;
   }
@@ -145,7 +146,7 @@ export class Collection {
   async insert(doc, options = {}) {
     if (!this.db) this.db = await getDB();
 
-    this._runBeforeHook('insert', doc, options);
+    await this._runBeforeHook('insert', doc, options);
 
     const cleanedDoc = this._getCleanDoc(doc);
 
@@ -156,7 +157,7 @@ export class Collection {
     const result = await this.db.collection(this.collectionName)
       .insertOne(cleanedDoc, options);
 
-    this._runAfterHook('insert', cleanedDoc, options);
+    await this._runAfterHook('insert', cleanedDoc, options);
 
     return result;
   }
@@ -164,12 +165,12 @@ export class Collection {
   async deleteOne(selector, options) {
     if (!this.db) this.db = await getDB();
 
-    this._runBeforeHook('deleteOne', selector, options);
+    await this._runBeforeHook('deleteOne', selector, options);
 
     const result = await this.db.collection(this.collectionName)
       .deleteOne(selector, options);
 
-    this._runAfterHook('deleteOne', selector, options);
+    await this._runAfterHook('deleteOne', selector, options);
 
     return result;
   }
@@ -177,12 +178,12 @@ export class Collection {
   async deleteMany(selector, options) {
     if (!this.db) this.db = await getDB();
 
-    this._runBeforeHook('deleteMany', selector, options);
+    await this._runBeforeHook('deleteMany', selector, options);
 
     const result = await this.db.collection(this.collectionName)
       .deleteMany(selector, options);
 
-    this._runAfterHook('deleteMany', selector, options);
+    await this._runAfterHook('deleteMany', selector, options);
 
     return result;
   }
@@ -216,19 +217,21 @@ export class Collection {
     this._after[action].push(callback);
   }
 
-  _runBeforeHook(hook, selector, modifier, options) {
+  async _runBeforeHook(hook, selector, modifier, options) {
     if (this._hasBeforeHook(hook)) {
-      this._before[hook].every((callback) => {
-        return callback.call(this, selector, modifier, options);
-      });
+      for (let i = 0; i < this._before[hook].length; i++) {
+        const callback = this._before[hook][i];
+        await callback.call(this, selector, modifier, options);
+      }
     }
   }
 
-  _runAfterHook(hook, selector, modifier, options) {
+  async _runAfterHook(hook, selector, modifier, options) {
     if (this._hasAfterHook(hook)) {
-      this._after[hook].every((callback) => {
-        return callback.call(this, selector, modifier, options);
-      });
+      for (let i = 0; i < this._after[hook].length; i++) {
+        const callback = this._after[hook][i];
+        await callback.call(this, selector, modifier, options);
+      }
     }
   }
 

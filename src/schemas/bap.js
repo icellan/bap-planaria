@@ -57,21 +57,23 @@ export const BAP = new Collection('bap', new SimpleSchema({
 BAP.after('updateOne', async (doc, modifier, options) => {
   if (
     options.upsert === true
-    && doc.type
-    && doc.hash
-    && doc.sequence
-    && doc.signatureAddress
+    && modifier.$set
+    && modifier.$set.type
+    && modifier.$set.hash
+    && modifier.$set.sequence
+    && modifier.$set.signatureAddress
   ) {
-    if (doc.type === 'ATTEST') {
-      await handleAttestationTransaction(doc);
-    } else if (doc.type === 'ID') {
-      await handleIDTransaction(doc);
-    } else if (doc.type === 'REVOKE') {
-      await handleRevokeTransaction(doc);
-    } else if (doc.type === 'ALIAS') {
-      await handleAliasTransaction(doc);
-    } else if (doc.type === 'DATA') {
-      await handleDataTransaction(doc);
+    const { type } = modifier.$set;
+    if (type === 'ATTEST') {
+      await handleAttestationTransaction(modifier.$set);
+    } else if (type === 'ID') {
+      await handleIDTransaction(modifier.$set);
+    } else if (type === 'REVOKE') {
+      await handleRevokeTransaction(modifier.$set);
+    } else if (type === 'ALIAS') {
+      await handleAliasTransaction(modifier.$set);
+    } else if (type === 'DATA') {
+      await handleDataTransaction(modifier.$set);
     }
 
     await BAP.update({

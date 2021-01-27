@@ -3,6 +3,7 @@ import {
   wasIdValidForAddressAt,
 } from './id';
 import { Attest } from './schemas/attest';
+import { addBAPErrorTransaction } from './bap';
 
 export const handleAttestationTransaction = async function (doc) {
   if (doc.type !== 'ATTEST') return;
@@ -23,7 +24,7 @@ export const handleAttestationTransaction = async function (doc) {
     const existing = await Attest.findOne({ _id: doc.hash });
     if (existing) {
       // we must first check whether this transaction has already been added to 'signers'
-      const txAlreadyInAttestation = existing.signers.find((sign) => {
+      const txAlreadyInAttestation = existing.signers?.find((sign) => {
         return sign.txId === doc.txId;
       });
       if (txAlreadyInAttestation) {
@@ -38,7 +39,7 @@ export const handleAttestationTransaction = async function (doc) {
         });
       } else {
         // here we must check whether the idKey has signed before
-        const signerAlreadyInAttestation = existing.signers.find((sign) => {
+        const signerAlreadyInAttestation = existing.signers?.find((sign) => {
           return sign.idKey === idKey;
         });
         if (signerAlreadyInAttestation) {
@@ -73,6 +74,14 @@ export const handleAttestationTransaction = async function (doc) {
         signers: [attestation],
       });
     }
+  } else {
+    await addBAPErrorTransaction({
+      txId: doc._id,
+      doc,
+      error: 'Could not validate attestation',
+      id,
+      validAddress,
+    });
   }
 };
 

@@ -219,7 +219,7 @@ export const parseBAPTransaction = function (op) {
 export const processBlockEvents = async function (event) {
   const txId = event.tx.h;
   const block = event.blk && event.blk.i;
-  const timestamp = event.timestamp || +new Date();
+  const timestamp = event.blk.t || Math.round(+new Date() / 1000);
   if (event.out) {
     /* eslint-disable no-restricted-syntax */
     for (const op of event.out) {
@@ -258,6 +258,37 @@ export const indexBAPTransactions = async function (queryFind) {
   const query = getBitsocketQuery(lastBlockIndexed, queryFind);
 
   const data = await getBitbusBlockEvents(query);
+
+  // We must first do all the ID transactions, the attestations rely on them
+  data.sort((a, b) => {
+    const aOut = a.out.find((ao) => {
+      return ao.s1 === '1BAPSuaPnfGnSBM3GLV9yhxUdYe4vGbdMT'
+        || ao.s2 === '1BAPSuaPnfGnSBM3GLV9yhxUdYe4vGbdMT';
+    });
+    const bOut = b.out.find((bo) => {
+      return bo.s1 === '1BAPSuaPnfGnSBM3GLV9yhxUdYe4vGbdMT'
+        || bo.s2 === '1BAPSuaPnfGnSBM3GLV9yhxUdYe4vGbdMT';
+    });
+
+    const cmdA = aOut.o0 === 'OP_RETURN' ? aOut.s2 : aOut.s3;
+    const cmdB = bOut.o0 === 'OP_RETURN' ? bOut.s2 : bOut.s3;
+
+    let sort = 0;
+    if (cmdA === cmdB) {
+      if (a.blk.i === b.blk.i) {
+        sort = 0;
+      } else {
+        sort = a.blk.i > b.blk.i ? 1 : -1;
+      }
+    } else if (cmdA === 'ID') {
+      sort = -1;
+    } else if (cmdB === 'ID') {
+      sort = 1;
+    }
+
+    return sort;
+  });
+
   for (let i = 0; i < data.length; i++) {
     await processBlockEvents(data[i]);
   }
