@@ -219,7 +219,7 @@ export const parseBAPTransaction = function (op) {
 export const processBlockEvents = async function (event) {
   const txId = event.tx.h;
   const block = event.blk && event.blk.i;
-  const timestamp = event.blk.t || Math.round(+new Date() / 1000);
+  const timestamp = (event.blk && event.blk.t) || Math.round(+new Date() / 1000);
   if (event.out) {
     /* eslint-disable no-restricted-syntax */
     for (const op of event.out) {
