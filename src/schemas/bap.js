@@ -49,6 +49,9 @@ export const BAP = new Collection('bap', new SimpleSchema({
   processed: {
     type: Boolean,
   },
+  error: {
+    type: String,
+  },
 }));
 
 // all BAP inserts / updates are done as upserts
@@ -63,25 +66,34 @@ BAP.after('updateOne', async (doc, modifier, options) => {
     && modifier.$set.sequence
     && modifier.$set.signatureAddress
   ) {
-    const { type } = modifier.$set;
-    if (type === 'ATTEST') {
-      await handleAttestationTransaction(modifier.$set);
-    } else if (type === 'ID') {
-      await handleIDTransaction(modifier.$set);
-    } else if (type === 'REVOKE') {
-      await handleRevokeTransaction(modifier.$set);
-    } else if (type === 'ALIAS') {
-      await handleAliasTransaction(modifier.$set);
-    } else if (type === 'DATA') {
-      await handleDataTransaction(modifier.$set);
+    try {
+      const { type } = modifier.$set;
+      if (type === 'ATTEST') {
+        await handleAttestationTransaction(modifier.$set);
+      } else if (type === 'ID') {
+        await handleIDTransaction(modifier.$set);
+      } else if (type === 'REVOKE') {
+        await handleRevokeTransaction(modifier.$set);
+      } else if (type === 'ALIAS') {
+        await handleAliasTransaction(modifier.$set);
+      } else if (type === 'DATA') {
+        await handleDataTransaction(modifier.$set);
+      }
+      await BAP.update({
+        _id: doc._id,
+      }, {
+        $set: {
+          processed: true,
+        },
+      });
+    } catch (e) {
+      await BAP.update({
+        _id: doc._id,
+      }, {
+        $set: {
+          error: JSON.stringify(e, Object.getOwnPropertyNames(e)),
+        },
+      });
     }
-
-    await BAP.update({
-      _id: doc._id,
-    }, {
-      $set: {
-        processed: true,
-      },
-    });
   }
 });

@@ -1,3 +1,4 @@
+import bsv from 'bsv';
 import { ID } from './schemas/id';
 
 export const getIdForAddress = async function (address) {
@@ -119,6 +120,16 @@ export const handleIDTransaction = async function (doc) {
       }
     }
   } else {
+    // new ID - the idKey (hash) should be a hash of the rootAddress !!!
+    // but only from block 672857
+    if (!doc.block || doc.block > 672857) {
+      const idKeyShouldBe = bsv.crypto.Hash.sha256(Buffer.from(doc.signatureAddress))
+        .toString('hex');
+      if (idKeyShouldBe !== doc.hash) {
+        throw new Error('Id key does not match root address');
+      }
+    }
+
     await ID.insert({
       _id: doc.hash,
       firstSeen: doc.block,

@@ -23,6 +23,10 @@ const testInsertId = async function (includeBlock = true) {
   const useTestData = Object.assign({}, testData);
   if (includeBlock) {
     useTestData.block = 647493;
+  } else {
+    // since this is a mempool transaction, we need to fake the proper idKey which is
+    // a hash of the root address - this changed from block 672857
+    useTestData.hash = "d5b4ee092ad00bca01917268d19609e11d7062d6c154c9f207996df54bc8cc96";
   }
   await handleIDTransaction(useTestData);
 
@@ -79,6 +83,24 @@ describe('handleIDTransaction', () => {
     });
     expect(id.firstSeen).toEqual(123123);
     expect(id.addresses[0].block).toEqual(123123);
+  });
+
+  test('new id key constraint after block 672857', async () => {
+    const newTestData = Object.assign({}, testData);
+    newTestData.block = 672858;
+
+    await expect(handleIDTransaction(newTestData))
+      .rejects
+      .toThrow('Id key does not match root address');
+
+    newTestData.hash = "d5b4ee092ad00bca01917268d19609e11d7062d6c154c9f207996df54bc8cc96";
+    newTestData.block = 672858;
+    await handleIDTransaction(newTestData);
+    const id = await ID.findOne({
+      _id: newTestData.hash,
+    });
+    expect(id.firstSeen).toEqual(672858);
+    expect(id.addresses[0].block).toEqual(672858);
   });
 
   test('update signing key', async () => {

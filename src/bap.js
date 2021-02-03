@@ -131,10 +131,7 @@ export const processBapTransaction = async function (bapTransaction) {
     $set: bapQuery,
   }, {
     upsert: true,
-  })
-    .catch((e) => {
-      console.error(e);
-    });
+  });
 };
 
 /**
