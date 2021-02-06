@@ -80,14 +80,16 @@ export const handleIDTransaction = async function (doc) {
     });
     if (txAlreadyInIds) {
       // we will only update the block here, otherwise something strange is going on
-      await ID.updateOne({
-        _id: doc.hash,
-        'addresses.txId': doc._id,
-      }, {
-        $set: {
-          'addresses.$.block': doc.block,
-        },
-      });
+      if (doc.block) {
+        await ID.updateOne({
+          _id: doc.hash,
+          'addresses.txId': doc._id,
+        }, {
+          $set: {
+            'addresses.$.block': doc.block,
+          },
+        });
+      }
 
       // If the ID is new and now only being mined, than we also need to set firstSeen
       if (!existing.firstSeen && existing.addresses[0].txId === doc._id) {

@@ -250,13 +250,12 @@ export const processBlockEvents = async function (event) {
   }
 };
 
-export const indexBAPTransactions = async function (queryFind) {
-  const lastBlockIndexed = await getLastBlockIndex();
-  const query = getBitsocketQuery(lastBlockIndexed, queryFind);
-
-  const data = await getBitbusBlockEvents(query);
-
+export const sortTransactionsForProcessing = function (data) {
   // We must first do all the ID transactions, the attestations rely on them
+  // TODO there is a problem with ID transactions that all come in the same block, as in
+  //      there is no way to see in which order they were broadcast. Bitbus returns them all
+  //      in 1 go, with the same timestamp and block. It is needed to make this smarter, to also
+  //      look at order requirements between ID transactions.
   data.sort((a, b) => {
     const aOut = a.out.find((ao) => {
       return ao.s1 === '1BAPSuaPnfGnSBM3GLV9yhxUdYe4vGbdMT'
@@ -285,6 +284,14 @@ export const indexBAPTransactions = async function (queryFind) {
 
     return sort;
   });
+};
+
+export const indexBAPTransactions = async function (queryFind) {
+  const lastBlockIndexed = await getLastBlockIndex();
+  const query = getBitsocketQuery(lastBlockIndexed, queryFind);
+
+  const data = await getBitbusBlockEvents(query);
+  sortTransactionsForProcessing(data);
 
   for (let i = 0; i < data.length; i++) {
     await processBlockEvents(data[i]);
