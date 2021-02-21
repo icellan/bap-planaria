@@ -11,6 +11,7 @@ import { Errors } from './schemas/errors';
 import { getBitbusBlockEvents } from './get';
 import { validAIPSignature } from './aip';
 import { getStatusValue, updateStatusValue } from './status';
+import { sortTransactionsForProcessing } from './lib/sorting';
 
 export const FIRST_BAP_BLOCK = 590000;
 
@@ -125,13 +126,23 @@ export const processBapTransaction = async function (bapTransaction) {
   delete bapQuery.txId;
   bapQuery.processed = false;
 
-  await BAP.updateOne({
-    _id: bapQuery._id,
-  }, {
-    $set: bapQuery,
-  }, {
-    upsert: true,
-  });
+  const existing = await BAP.findOne({ _id: bapQuery._id });
+  if (existing) {
+    const bapId = bapQuery._id;
+    delete bapQuery._id;
+    if (existing.timestamp) {
+      // do not update timestamp if already set, we'll use the original one from the mempool
+      delete bapQuery.timestamp;
+    }
+
+    await BAP.updateOne({
+      _id: bapId,
+    }, {
+      $set: bapQuery,
+    });
+  } else {
+    await BAP.insert(bapQuery);
+  }
 };
 
 /**
@@ -250,48 +261,12 @@ export const processBlockEvents = async function (event) {
   }
 };
 
-export const sortTransactionsForProcessing = function (data) {
-  // We must first do all the ID transactions, the attestations rely on them
-  // TODO there is a problem with ID transactions that all come in the same block, as in
-  //      there is no way to see in which order they were broadcast. Bitbus returns them all
-  //      in 1 go, with the same timestamp and block. It is needed to make this smarter, to also
-  //      look at order requirements between ID transactions.
-  data.sort((a, b) => {
-    const aOut = a.out.find((ao) => {
-      return ao.s1 === '1BAPSuaPnfGnSBM3GLV9yhxUdYe4vGbdMT'
-        || ao.s2 === '1BAPSuaPnfGnSBM3GLV9yhxUdYe4vGbdMT';
-    });
-    const bOut = b.out.find((bo) => {
-      return bo.s1 === '1BAPSuaPnfGnSBM3GLV9yhxUdYe4vGbdMT'
-        || bo.s2 === '1BAPSuaPnfGnSBM3GLV9yhxUdYe4vGbdMT';
-    });
-
-    const cmdA = aOut.o0 === 'OP_RETURN' ? aOut.s2 : aOut.s3;
-    const cmdB = bOut.o0 === 'OP_RETURN' ? bOut.s2 : bOut.s3;
-
-    let sort = 0;
-    if (cmdA === cmdB) {
-      if (a.blk.i === b.blk.i) {
-        sort = 0;
-      } else {
-        sort = a.blk.i > b.blk.i ? 1 : -1;
-      }
-    } else if (cmdA === 'ID') {
-      sort = -1;
-    } else if (cmdB === 'ID') {
-      sort = 1;
-    }
-
-    return sort;
-  });
-};
-
 export const indexBAPTransactions = async function (queryFind) {
   const lastBlockIndexed = await getLastBlockIndex();
   const query = getBitsocketQuery(lastBlockIndexed, queryFind);
 
-  const data = await getBitbusBlockEvents(query);
-  sortTransactionsForProcessing(data);
+  let data = await getBitbusBlockEvents(query);
+  data = sortTransactionsForProcessing(data);
 
   for (let i = 0; i < data.length; i++) {
     await processBlockEvents(data[i]);
