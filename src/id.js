@@ -123,10 +123,15 @@ export const handleIDTransaction = async function (doc) {
     }
   } else {
     // new ID - the idKey (hash) should be a hash of the rootAddress !!!
-    // but only from block 672857
-    if (!doc.block || doc.block > 672857) {
-      const idKeyShouldBe = bsv.crypto.Hash.sha256(Buffer.from(doc.signatureAddress))
-        .toString('hex');
+    // but only from block 675400
+    // turned off for now
+    const useIdChecking = false;
+    if (useIdChecking && (!doc.block || doc.block > 675400)) {
+      const idKeyShouldBe = bsv.encoding.Base58(
+        bsv.crypto.Hash.ripemd160(
+          Buffer.from(doc.signatureAddress),
+        ),
+      ).toString();
       if (idKeyShouldBe !== doc.hash) {
         throw new Error('Id key does not match root address');
       }

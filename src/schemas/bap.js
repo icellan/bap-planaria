@@ -54,13 +54,11 @@ export const BAP = new Collection('bap', new SimpleSchema({
   },
 }));
 
-// all BAP inserts / updates are done as upserts
 // there will only be valid transactions inserted, so here we can assume that for instance
 // signing has been verified
-BAP.after('updateOne', async (doc, modifier, options) => {
+const processBAPinserts = async function (doc, modifier) {
   if (
-    options.upsert === true
-    && modifier.$set
+    modifier.$set
     && modifier.$set.type
     && modifier.$set.hash
     && modifier.$set.sequence
@@ -96,4 +94,12 @@ BAP.after('updateOne', async (doc, modifier, options) => {
       });
     }
   }
+};
+
+BAP.after('insert', async (doc, modifier) => {
+  await processBAPinserts(doc, modifier);
+});
+
+BAP.after('updateOne', async (doc, modifier) => {
+  await processBAPinserts(doc, modifier);
 });
