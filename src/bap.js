@@ -70,6 +70,17 @@ export const addBAPErrorTransaction = async function (bapOp) {
 };
 
 /**
+ * Check whether the given data is base64
+ *
+ * @param data
+ * @returns {boolean}
+ */
+export const isBase64 = function (data) {
+  const regex = '(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}==|[A-Za-z0-9+\/]{3}=)?';
+  return (new RegExp('^' + regex + '$', 'gi')).test(data);
+};
+
+/**
  * Get clean op_return from the bitbus output
  */
 export const parseOpReturn = function (op) {
@@ -80,7 +91,13 @@ export const parseOpReturn = function (op) {
   for (let i = 0; i < len; i++) {
     // :-( this is disgusting - must do better
     if (op[`s${i - 3}`] === AIP_BITCOM_ADDRESS) {
-      opReturn.push(op[`b${i}`]);
+      // sometimes the AIP signatures are put on-chain as base64, sometimes as binary
+      // we must check whether this was a base64 and use that
+      if (op[`s${i}`] && isBase64(op[`s${i}`])) {
+        opReturn.push(op[`s${i}`]);
+      } else {
+        opReturn.push(op[`b${i}`]);
+      }
     } else {
       opReturn.push(op[`s${i}`] || op[`o${i}`] || op[`h${i}`] || op[`b${i}`]);
     }
