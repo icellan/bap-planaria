@@ -96,8 +96,8 @@ const processBAPinserts = async function (doc, modifier) {
   }
 };
 
-BAP.after('insert', async (doc, modifier) => {
-  await processBAPinserts(doc, modifier);
+BAP.after('insert', async (doc) => {
+  await processBAPinserts(doc, { $set: doc });
 });
 
 BAP.after('updateOne', async (doc, modifier) => {
